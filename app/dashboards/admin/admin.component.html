@@ -440,59 +440,184 @@
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'teachers' && !loading" class="placeholder-content animate-slide-up">
-      <div class="placeholder-card shadow-hover">
-        <div class="placeholder-icon">
+    <!-- Teachers Management Tab -->
+    <div *ngIf="activeTab === 'teachers' && !loading" class="crud-content animate-slide-up">
+      <div class="crud-header">
+        <div class="crud-title">
+          <h2><i class="bi bi-person-badge"></i> Gestion des Enseignants</h2>
+          <p>Gérez les enseignants et leurs affectations</p>
+        </div>
+        <div class="crud-actions">
+          <button class="btn-primary-enhanced" (click)="openTeacherModal('create')">
+            <i class="bi bi-plus-circle"></i>
+            Ajouter un Enseignant
+          </button>
+        </div>
+      </div>
+
+      <div class="crud-filters">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input 
+            type="text" 
+            placeholder="Rechercher un enseignant..." 
+            [(ngModel)]="teacherSearchTerm"
+            class="search-input">
+        </div>
+      </div>
+
+      <div class="crud-table-container" *ngIf="!teachersLoading">
+        <table class="crud-table">
+          <thead>
+            <tr>
+              <th>Nom Complet</th>
+              <th>Matières</th>
+              <th>Téléphone</th>
+              <th>Date d'embauche</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let teacher of filteredTeachers; trackBy: trackByTeacherId">
+              <td>
+                <div class="user-info">
+                  <div class="user-avatar">
+                    <i class="bi bi-person-badge"></i>
+                  </div>
+                  <div class="user-details">
+                    <div class="user-name">{{teacher.full_name}}</div>
+                    <div class="user-meta">Enseignant</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="subjects-list">
+                  <span *ngFor="let subject of teacher.subjects; let last = last" class="subject-tag">
+                    {{subject.name}}<span *ngIf="!last">, </span>
+                  </span>
+                  <span *ngIf="teacher.subjects.length === 0" class="no-subjects">Aucune matière</span>
+                </div>
+              </td>
+              <td>{{teacher.phone || 'Non renseigné'}}</td>
+              <td>{{teacher.hire_date | date:'dd/MM/yyyy' || 'Non renseigné'}}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-action btn-view" (click)="openTeacherModal('view', teacher)" title="Voir">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn-action btn-edit" (click)="openTeacherModal('edit', teacher)" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteTeacher(teacher)" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredTeachers.length === 0" class="empty-state">
           <i class="bi bi-person-badge"></i>
+          <h3>Aucun enseignant trouvé</h3>
+          <p>Aucun enseignant ne correspond à vos critères de recherche</p>
         </div>
-        <h2>Gestion des Enseignants</h2>
-        <p>Système complet de gestion du personnel enseignant et de leurs affectations.</p>
-        <div class="placeholder-features">
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Profils enseignants détaillés</span>
-          </div>
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Affectation aux matières</span>
-          </div>
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Planning et disponibilités</span>
-          </div>
-        </div>
-        <button class="btn-success-enhanced" (click)="handleTeacherAction('create')">
-          <i class="bi bi-plus-circle"></i>
-          Ajouter un Enseignant
-        </button>
+      </div>
+
+      <div *ngIf="teachersLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des enseignants...</p>
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'students' && !loading" class="placeholder-content animate-slide-up">
-      <div class="placeholder-card shadow-hover">
-        <div class="placeholder-icon">
+    <!-- Students Management Tab -->
+    <div *ngIf="activeTab === 'students' && !loading" class="crud-content animate-slide-up">
+      <div class="crud-header">
+        <div class="crud-title">
+          <h2><i class="bi bi-mortarboard"></i> Gestion des Étudiants</h2>
+          <p>Gérez les étudiants et leurs inscriptions</p>
+        </div>
+        <div class="crud-actions">
+          <button class="btn-primary-enhanced" (click)="openStudentModal('create')">
+            <i class="bi bi-plus-circle"></i>
+            Ajouter un Étudiant
+          </button>
+        </div>
+      </div>
+
+      <div class="crud-filters">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input 
+            type="text" 
+            placeholder="Rechercher un étudiant..." 
+            [(ngModel)]="studentSearchTerm"
+            class="search-input">
+        </div>
+        <div class="filter-box">
+          <select [(ngModel)]="selectedClassFilter" class="filter-select">
+            <option value="">Toutes les classes</option>
+            <option *ngFor="let class of classes" [value]="class.id">{{class.name}}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="crud-table-container" *ngIf="!studentsLoading">
+        <table class="crud-table">
+          <thead>
+            <tr>
+              <th>Nom Complet</th>
+              <th>Matricule</th>
+              <th>Classe</th>
+              <th>Téléphone</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of filteredStudents; trackBy: trackByStudentId">
+              <td>
+                <div class="user-info">
+                  <div class="user-avatar">
+                    <i class="bi bi-person"></i>
+                  </div>
+                  <div class="user-details">
+                    <div class="user-name">{{student.full_name}}</div>
+                    <div class="user-meta">Étudiant</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="matricule-badge">{{student.matricule}}</span>
+              </td>
+              <td>{{getClassNameById(student.class_id)}}</td>
+              <td>{{student.phone || 'Non renseigné'}}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-action btn-view" (click)="openStudentModal('view', student)" title="Voir">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn-action btn-edit" (click)="openStudentModal('edit', student)" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteStudent(student)" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="filteredStudents.length === 0" class="empty-state">
           <i class="bi bi-mortarboard"></i>
+          <h3>Aucun étudiant trouvé</h3>
+          <p>Aucun étudiant ne correspond à vos critères de recherche</p>
         </div>
-        <h2>Gestion des Étudiants</h2>
-        <p>Interface complète pour la gestion des étudiants, inscriptions et parcours académiques.</p>
-        <div class="placeholder-features">
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Dossiers étudiants complets</span>
-          </div>
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Suivi des notes et évaluations</span>
-          </div>
-          <div class="feature-item">
-            <i class="bi bi-check-circle"></i>
-            <span>Gestion des inscriptions</span>
-          </div>
-        </div>
-        <button class="btn-info-enhanced" (click)="handleStudentAction('create')">
-          <i class="bi bi-plus-circle"></i>
-          Ajouter un Étudiant
-        </button>
+      </div>
+
+      <div *ngIf="studentsLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des étudiants...</p>
       </div>
     </div>
 
@@ -549,6 +674,346 @@
           <i class="bi bi-plus-circle"></i>
           Créer un Emploi du Temps
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Modal -->
+<div class="modal-overlay" *ngIf="teacherModal.isOpen" (click)="closeTeacherModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="bi bi-person-badge"></i>
+        <span *ngIf="teacherModal.mode === 'create'">Ajouter un Enseignant</span>
+        <span *ngIf="teacherModal.mode === 'edit'">Modifier l'Enseignant</span>
+        <span *ngIf="teacherModal.mode === 'view'">Détails de l'Enseignant</span>
+      </h3>
+      <button class="modal-close" (click)="closeTeacherModal()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="teacherForm" (ngSubmit)="saveTeacher()" *ngIf="teacherModal.mode !== 'view'">
+        <div class="form-grid">
+          <div class="form-group" *ngIf="teacherModal.mode === 'create'">
+            <label for="teacher-username">Nom d'utilisateur *</label>
+            <input 
+              type="text" 
+              id="teacher-username"
+              formControlName="username"
+              class="form-control"
+              [class.error]="getFieldError(teacherForm, 'username')">
+            <div class="error-message" *ngIf="getFieldError(teacherForm, 'username')">
+              {{getFieldError(teacherForm, 'username')}}
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="teacherModal.mode === 'create'">
+            <label for="teacher-email">Email *</label>
+            <input 
+              type="email" 
+              id="teacher-email"
+              formControlName="email"
+              class="form-control"
+              [class.error]="getFieldError(teacherForm, 'email')">
+            <div class="error-message" *ngIf="getFieldError(teacherForm, 'email')">
+              {{getFieldError(teacherForm, 'email')}}
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="teacherModal.mode === 'create'">
+            <label for="teacher-password">Mot de passe *</label>
+            <input 
+              type="password" 
+              id="teacher-password"
+              formControlName="password"
+              class="form-control"
+              [class.error]="getFieldError(teacherForm, 'password')">
+            <div class="error-message" *ngIf="getFieldError(teacherForm, 'password')">
+              {{getFieldError(teacherForm, 'password')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="teacher-first-name">Prénom *</label>
+            <input 
+              type="text" 
+              id="teacher-first-name"
+              formControlName="first_name"
+              class="form-control"
+              [class.error]="getFieldError(teacherForm, 'first_name')">
+            <div class="error-message" *ngIf="getFieldError(teacherForm, 'first_name')">
+              {{getFieldError(teacherForm, 'first_name')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="teacher-last-name">Nom *</label>
+            <input 
+              type="text" 
+              id="teacher-last-name"
+              formControlName="last_name"
+              class="form-control"
+              [class.error]="getFieldError(teacherForm, 'last_name')">
+            <div class="error-message" *ngIf="getFieldError(teacherForm, 'last_name')">
+              {{getFieldError(teacherForm, 'last_name')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="teacher-phone">Téléphone</label>
+            <input 
+              type="tel" 
+              id="teacher-phone"
+              formControlName="phone"
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="teacher-hire-date">Date d'embauche</label>
+            <input 
+              type="date" 
+              id="teacher-hire-date"
+              formControlName="hire_date"
+              class="form-control">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="teacher-address">Adresse</label>
+            <textarea 
+              id="teacher-address"
+              formControlName="address"
+              class="form-control"
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeTeacherModal()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="teacherForm.invalid">
+            <i class="bi bi-check"></i>
+            {{teacherModal.mode === 'create' ? 'Créer' : 'Modifier'}}
+          </button>
+        </div>
+      </form>
+
+      <!-- View Mode -->
+      <div *ngIf="teacherModal.mode === 'view' && teacherModal.data" class="view-content">
+        <div class="view-grid">
+          <div class="view-item">
+            <label>Nom complet</label>
+            <span>{{teacherModal.data.full_name}}</span>
+          </div>
+          <div class="view-item">
+            <label>Téléphone</label>
+            <span>{{teacherModal.data.phone || 'Non renseigné'}}</span>
+          </div>
+          <div class="view-item">
+            <label>Date d'embauche</label>
+            <span>{{teacherModal.data.hire_date | date:'dd/MM/yyyy' || 'Non renseigné'}}</span>
+          </div>
+          <div class="view-item full-width">
+            <label>Adresse</label>
+            <span>{{teacherModal.data.address || 'Non renseigné'}}</span>
+          </div>
+          <div class="view-item full-width">
+            <label>Matières enseignées</label>
+            <div class="subjects-view">
+              <span *ngFor="let subject of teacherModal.data.subjects" class="subject-tag">
+                {{subject.name}}
+              </span>
+              <span *ngIf="teacherModal.data.subjects.length === 0">Aucune matière assignée</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Student Modal -->
+<div class="modal-overlay" *ngIf="studentModal.isOpen" (click)="closeStudentModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>
+        <i class="bi bi-mortarboard"></i>
+        <span *ngIf="studentModal.mode === 'create'">Ajouter un Étudiant</span>
+        <span *ngIf="studentModal.mode === 'edit'">Modifier l'Étudiant</span>
+        <span *ngIf="studentModal.mode === 'view'">Détails de l'Étudiant</span>
+      </h3>
+      <button class="modal-close" (click)="closeStudentModal()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="studentForm" (ngSubmit)="saveStudent()" *ngIf="studentModal.mode !== 'view'">
+        <div class="form-grid">
+          <div class="form-group" *ngIf="studentModal.mode === 'create'">
+            <label for="student-username">Nom d'utilisateur *</label>
+            <input 
+              type="text" 
+              id="student-username"
+              formControlName="username"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'username')">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'username')">
+              {{getFieldError(studentForm, 'username')}}
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="studentModal.mode === 'create'">
+            <label for="student-email">Email *</label>
+            <input 
+              type="email" 
+              id="student-email"
+              formControlName="email"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'email')">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'email')">
+              {{getFieldError(studentForm, 'email')}}
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="studentModal.mode === 'create'">
+            <label for="student-password">Mot de passe *</label>
+            <input 
+              type="password" 
+              id="student-password"
+              formControlName="password"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'password')">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'password')">
+              {{getFieldError(studentForm, 'password')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="student-matricule">Matricule *</label>
+            <input 
+              type="text" 
+              id="student-matricule"
+              formControlName="matricule"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'matricule')"
+              placeholder="Ex: ABC1234">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'matricule')">
+              {{getFieldError(studentForm, 'matricule')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="student-first-name">Prénom *</label>
+            <input 
+              type="text" 
+              id="student-first-name"
+              formControlName="first_name"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'first_name')">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'first_name')">
+              {{getFieldError(studentForm, 'first_name')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="student-last-name">Nom *</label>
+            <input 
+              type="text" 
+              id="student-last-name"
+              formControlName="last_name"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'last_name')">
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'last_name')">
+              {{getFieldError(studentForm, 'last_name')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="student-class">Classe *</label>
+            <select 
+              id="student-class"
+              formControlName="class_id"
+              class="form-control"
+              [class.error]="getFieldError(studentForm, 'class_id')">
+              <option value="">Sélectionner une classe</option>
+              <option *ngFor="let class of classes" [value]="class.id">{{class.name}}</option>
+            </select>
+            <div class="error-message" *ngIf="getFieldError(studentForm, 'class_id')">
+              {{getFieldError(studentForm, 'class_id')}}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="student-phone">Téléphone</label>
+            <input 
+              type="tel" 
+              id="student-phone"
+              formControlName="phone"
+              class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="student-birth-date">Date de naissance</label>
+            <input 
+              type="date" 
+              id="student-birth-date"
+              formControlName="birth_date"
+              class="form-control">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="student-address">Adresse</label>
+            <textarea 
+              id="student-address"
+              formControlName="address"
+              class="form-control"
+              rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeStudentModal()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="studentForm.invalid">
+            <i class="bi bi-check"></i>
+            {{studentModal.mode === 'create' ? 'Créer' : 'Modifier'}}
+          </button>
+        </div>
+      </form>
+
+      <!-- View Mode -->
+      <div *ngIf="studentModal.mode === 'view' && studentModal.data" class="view-content">
+        <div class="view-grid">
+          <div class="view-item">
+            <label>Nom complet</label>
+            <span>{{studentModal.data.full_name}}</span>
+          </div>
+          <div class="view-item">
+            <label>Matricule</label>
+            <span class="matricule-badge">{{studentModal.data.matricule}}</span>
+          </div>
+          <div class="view-item">
+            <label>Classe</label>
+            <span>{{getClassNameById(studentModal.data.class_id)}}</span>
+          </div>
+          <div class="view-item">
+            <label>Téléphone</label>
+            <span>{{studentModal.data.phone || 'Non renseigné'}}</span>
+          </div>
+          <div class="view-item">
+            <label>Date de naissance</label>
+            <span>{{studentModal.data.birth_date | date:'dd/MM/yyyy' || 'Non renseigné'}}</span>
+          </div>
+          <div class="view-item full-width">
+            <label>Adresse</label>
+            <span>{{studentModal.data.address || 'Non renseigné'}}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
