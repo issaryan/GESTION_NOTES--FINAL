@@ -1,0 +1,555 @@
+<div class="admin-dashboard-container">
+  <div class="admin-dashboard glass-effect shadow-soft">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="header-title">
+          <div class="title-icon">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <div class="title-text">
+            <h1 class="main-title gradient-text">Dashboard Administrateur</h1>
+            <p class="subtitle">Tableau de bord complet de gestion</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-refresh" (click)="refreshData()" [disabled]="loading">
+            <i class="bi bi-arrow-clockwise" [class.spinning]="loading"></i>
+            <span>Actualiser</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Navigation Tabs -->
+    <div class="nav-container">
+      <nav class="nav-tabs-enhanced">
+        <button 
+          *ngFor="let tab of tabs; trackBy: trackByTabId"
+          class="nav-tab" 
+          [class.active]="activeTab === tab.id"
+          (click)="setActiveTab(tab.id)">
+          <div class="tab-icon">
+            <i class="{{tab.icon}}"></i>
+          </div>
+          <span class="tab-label">{{tab.label}}</span>
+          <div class="tab-indicator"></div>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Enhanced Loading State -->
+    <div *ngIf="loading" class="loading-container animate-fade-in">
+      <div class="loading-content">
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <h3 class="loading-title">Chargement des données</h3>
+        <p class="loading-subtitle">Veuillez patienter pendant que nous récupérons les informations...</p>
+      </div>
+    </div>
+
+    <!-- Enhanced Error State -->
+    <div *ngIf="error && !loading" class="error-container animate-slide-up">
+      <div class="error-content">
+        <div class="error-icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h3 class="error-title">Erreur de chargement</h3>
+        <p class="error-message">{{error}}</p>
+        <button class="btn-retry" (click)="refreshData()">
+          <i class="bi bi-arrow-clockwise"></i>
+          Réessayer
+        </button>
+      </div>
+    </div>
+
+    <!-- Enhanced Statistics Tab -->
+    <div *ngIf="activeTab === 'statistics' && adminDashboardData && !loading" class="statistics-content animate-slide-up">
+      
+      <!-- Enhanced Quick Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card stat-card-primary shadow-hover" 
+             style="animation-delay: 0.1s">
+          <div class="stat-card-content">
+            <div class="stat-info">
+              <div class="stat-label">Total Étudiants</div>
+              <div class="stat-value">{{formatNumber(adminDashboardData.general_statistics.total_students)}}</div>
+              <div class="stat-trend">
+                <i class="bi bi-trending-up"></i>
+                <span>+12% ce mois</span>
+              </div>
+            </div>
+            <div class="stat-icon">
+              <i class="bi bi-mortarboard"></i>
+            </div>
+          </div>
+          <div class="stat-card-footer">
+            <div class="progress-ring">
+              <svg class="progress-ring-svg" width="60" height="60">
+                <circle class="progress-ring-circle-bg" cx="30" cy="30" r="25"></circle>
+                <circle class="progress-ring-circle" cx="30" cy="30" r="25" [style.stroke-dasharray]="getCircleProgress(85)"></circle>
+              </svg>
+              <span class="progress-text">85%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-success shadow-hover" 
+             style="animation-delay: 0.2s">
+          <div class="stat-card-content">
+            <div class="stat-info">
+              <div class="stat-label">Total Enseignants</div>
+              <div class="stat-value">{{formatNumber(adminDashboardData.general_statistics.total_teachers)}}</div>
+              <div class="stat-trend">
+                <i class="bi bi-trending-up"></i>
+                <span>+8% ce mois</span>
+              </div>
+            </div>
+            <div class="stat-icon">
+              <i class="bi bi-person-badge"></i>
+            </div>
+          </div>
+          <div class="stat-card-footer">
+            <div class="progress-ring">
+              <svg class="progress-ring-svg" width="60" height="60">
+                <circle class="progress-ring-circle-bg" cx="30" cy="30" r="25"></circle>
+                <circle class="progress-ring-circle" cx="30" cy="30" r="25" [style.stroke-dasharray]="getCircleProgress(92)"></circle>
+              </svg>
+              <span class="progress-text">92%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-info shadow-hover" 
+             style="animation-delay: 0.3s">
+          <div class="stat-card-content">
+            <div class="stat-info">
+              <div class="stat-label">Total Classes</div>
+              <div class="stat-value">{{formatNumber(adminDashboardData.general_statistics.total_classes)}}</div>
+              <div class="stat-trend">
+                <i class="bi bi-trending-up"></i>
+                <span>+5% ce mois</span>
+              </div>
+            </div>
+            <div class="stat-icon">
+              <i class="bi bi-building"></i>
+            </div>
+          </div>
+          <div class="stat-card-footer">
+            <div class="progress-ring">
+              <svg class="progress-ring-svg" width="60" height="60">
+                <circle class="progress-ring-circle-bg" cx="30" cy="30" r="25"></circle>
+                <circle class="progress-ring-circle" cx="30" cy="30" r="25" [style.stroke-dasharray]="getCircleProgress(78)"></circle>
+              </svg>
+              <span class="progress-text">78%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card-warning shadow-hover" 
+             style="animation-delay: 0.4s">
+          <div class="stat-card-content">
+            <div class="stat-info">
+              <div class="stat-label">Total Notes</div>
+              <div class="stat-value">{{formatNumber(adminDashboardData.general_statistics.total_grades)}}</div>
+              <div class="stat-trend">
+                <i class="bi bi-trending-up"></i>
+                <span>+15% ce mois</span>
+              </div>
+            </div>
+            <div class="stat-icon">
+              <i class="bi bi-clipboard-data"></i>
+            </div>
+          </div>
+          <div class="stat-card-footer">
+            <div class="progress-ring">
+              <svg class="progress-ring-svg" width="60" height="60">
+                <circle class="progress-ring-circle-bg" cx="30" cy="30" r="25"></circle>
+                <circle class="progress-ring-circle" cx="30" cy="30" r="25" [style.stroke-dasharray]="getCircleProgress(95)"></circle>
+              </svg>
+              <span class="progress-text">95%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Secondary Stats -->
+      <div class="secondary-stats">
+        <div class="secondary-stat-card shadow-hover">
+          <div class="secondary-stat-icon">
+            <i class="bi bi-graph-up"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <h4>Matières Enseignées</h4>
+            <div class="secondary-stat-value">{{formatNumber(adminDashboardData.general_statistics.total_subjects)}}</div>
+          </div>
+        </div>
+
+        <div class="secondary-stat-card shadow-hover">
+          <div class="secondary-stat-icon">
+            <i class="bi bi-people"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <h4>Moyenne Étudiants/Classe</h4>
+            <div class="secondary-stat-value">
+              {{adminDashboardData.general_statistics.total_classes > 0 ? 
+                formatNumber(Math.round(adminDashboardData.general_statistics.total_students / adminDashboardData.general_statistics.total_classes)) : 0}}
+            </div>
+          </div>
+        </div>
+
+        <div class="secondary-stat-card shadow-hover">
+          <div class="secondary-stat-icon">
+            <i class="bi bi-calculator"></i>
+          </div>
+          <div class="secondary-stat-content">
+            <h4>Moyenne Notes/Étudiant</h4>
+            <div class="secondary-stat-value">
+              {{adminDashboardData.general_statistics.total_students > 0 ? 
+                formatNumber(Math.round(adminDashboardData.general_statistics.total_grades / adminDashboardData.general_statistics.total_students)) : 0}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Data Tables Section -->
+      <div class="data-section">
+        <div class="data-table-container">
+          <div class="data-table-card shadow-hover">
+            <div class="card-header-enhanced">
+              <div class="header-title">
+                <i class="bi bi-bar-chart"></i>
+                <h3>Statistiques par Classe</h3>
+              </div>
+              <div class="header-actions">
+                <button class="btn-action">
+                  <i class="bi bi-download"></i>
+                  Exporter
+                </button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="enhanced-table">
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Étudiants</th>
+                    <th>Notes</th>
+                    <th>Moyenne</th>
+                    <th>Répartition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let classStats of adminDashboardData.classes_statistics; trackBy: trackByClassName">
+                    <td>
+                      <div class="class-badge">{{classStats.class_name}}</div>
+                    </td>
+                    <td>
+                      <div class="stat-number">{{formatNumber(classStats.student_count)}}</div>
+                    </td>
+                    <td>
+                      <div class="stat-number">{{formatNumber(classStats.grades_count)}}</div>
+                    </td>
+                    <td>
+                      <div class="stat-number">
+                        {{classStats.student_count > 0 ? 
+                          formatNumber(Math.round((classStats.grades_count / classStats.student_count) * 100) / 100) : 0}}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="progress-container">
+                        <div class="progress-bar-enhanced">
+                          <div class="progress-fill" 
+                               [style.width.%]="calculatePercentage(classStats.student_count, adminDashboardData.general_statistics.total_students)">
+                          </div>
+                        </div>
+                        <span class="progress-label">
+                          {{calculatePercentage(classStats.student_count, adminDashboardData.general_statistics.total_students)}}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card-container">
+          <div class="summary-card shadow-hover">
+            <div class="card-header-enhanced">
+              <div class="header-title">
+                <i class="bi bi-pie-chart"></i>
+                <h3>Répartition Générale</h3>
+              </div>
+            </div>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-icon summary-icon-primary">
+                  <i class="bi bi-mortarboard"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-label">Étudiants</div>
+                  <div class="summary-value">{{formatNumber(adminDashboardData.general_statistics.total_students)}}</div>
+                </div>
+              </div>
+
+              <div class="summary-item">
+                <div class="summary-icon summary-icon-success">
+                  <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-label">Enseignants</div>
+                  <div class="summary-value">{{formatNumber(adminDashboardData.general_statistics.total_teachers)}}</div>
+                </div>
+              </div>
+
+              <div class="summary-item">
+                <div class="summary-icon summary-icon-info">
+                  <i class="bi bi-building"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-label">Classes</div>
+                  <div class="summary-value">{{formatNumber(adminDashboardData.general_statistics.total_classes)}}</div>
+                </div>
+              </div>
+
+              <div class="summary-item">
+                <div class="summary-icon summary-icon-warning">
+                  <i class="bi bi-book"></i>
+                </div>
+                <div class="summary-content">
+                  <div class="summary-label">Matières</div>
+                  <div class="summary-value">{{formatNumber(adminDashboardData.general_statistics.total_subjects)}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Recent Activities -->
+      <div class="activities-section">
+        <div class="activity-card shadow-hover">
+          <div class="card-header-enhanced">
+            <div class="header-title">
+              <i class="bi bi-person-plus"></i>
+              <h3>Nouveaux Étudiants</h3>
+            </div>
+            <div class="header-actions">
+              <button class="btn-action">
+                <i class="bi bi-eye"></i>
+                Voir tout
+              </button>
+            </div>
+          </div>
+          <div class="activity-list">
+            <div *ngIf="adminDashboardData.recent_students && adminDashboardData.recent_students.length > 0; else noStudents">
+              <div class="activity-item" *ngFor="let student of adminDashboardData.recent_students.slice(0, 5); trackBy: trackByStudentId">
+                <div class="activity-avatar">
+                  <i class="bi bi-person"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-name">{{student.full_name}}</div>
+                  <div class="activity-meta">Matricule: {{student.matricule}}</div>
+                </div>
+                <div class="activity-time">
+                  <i class="bi bi-clock"></i>
+                  <span>Récent</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noStudents>
+              <div class="empty-state">
+                <i class="bi bi-person-plus"></i>
+                <p>Aucun nouvel étudiant récent</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="activity-card shadow-hover">
+          <div class="card-header-enhanced">
+            <div class="header-title">
+              <i class="bi bi-person-badge"></i>
+              <h3>Nouveaux Enseignants</h3>
+            </div>
+            <div class="header-actions">
+              <button class="btn-action">
+                <i class="bi bi-eye"></i>
+                Voir tout
+              </button>
+            </div>
+          </div>
+          <div class="activity-list">
+            <div *ngIf="adminDashboardData.recent_teachers && adminDashboardData.recent_teachers.length > 0; else noTeachers">
+              <div class="activity-item" *ngFor="let teacher of adminDashboardData.recent_teachers.slice(0, 5); trackBy: trackByTeacherId">
+                <div class="activity-avatar">
+                  <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-name">{{teacher.full_name}}</div>
+                  <div class="activity-meta">Enseignant</div>
+                </div>
+                <div class="activity-time">
+                  <i class="bi bi-clock"></i>
+                  <span>Récent</span>
+                </div>
+              </div>
+            </div>
+            <ng-template #noTeachers>
+              <div class="empty-state">
+                <i class="bi bi-person-badge"></i>
+                <p>Aucun nouvel enseignant récent</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Placeholder Tabs -->
+    <div *ngIf="activeTab === 'admins' && !loading" class="placeholder-content animate-slide-up">
+      <div class="placeholder-card shadow-hover">
+        <div class="placeholder-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <h2>Gestion des Administrateurs</h2>
+        <p>Interface complète de gestion des comptes administrateurs avec permissions et rôles.</p>
+        <div class="placeholder-features">
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Création et modification des comptes</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Gestion des permissions</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Historique des actions</span>
+          </div>
+        </div>
+        <button class="btn-primary-enhanced" (click)="handleAdminAction('create')">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un Administrateur
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'teachers' && !loading" class="placeholder-content animate-slide-up">
+      <div class="placeholder-card shadow-hover">
+        <div class="placeholder-icon">
+          <i class="bi bi-person-badge"></i>
+        </div>
+        <h2>Gestion des Enseignants</h2>
+        <p>Système complet de gestion du personnel enseignant et de leurs affectations.</p>
+        <div class="placeholder-features">
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Profils enseignants détaillés</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Affectation aux matières</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Planning et disponibilités</span>
+          </div>
+        </div>
+        <button class="btn-success-enhanced" (click)="handleTeacherAction('create')">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un Enseignant
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'students' && !loading" class="placeholder-content animate-slide-up">
+      <div class="placeholder-card shadow-hover">
+        <div class="placeholder-icon">
+          <i class="bi bi-mortarboard"></i>
+        </div>
+        <h2>Gestion des Étudiants</h2>
+        <p>Interface complète pour la gestion des étudiants, inscriptions et parcours académiques.</p>
+        <div class="placeholder-features">
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Dossiers étudiants complets</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Suivi des notes et évaluations</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Gestion des inscriptions</span>
+          </div>
+        </div>
+        <button class="btn-info-enhanced" (click)="handleStudentAction('create')">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter un Étudiant
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'classes' && !loading" class="placeholder-content animate-slide-up">
+      <div class="placeholder-card shadow-hover">
+        <div class="placeholder-icon">
+          <i class="bi bi-building"></i>
+        </div>
+        <h2>Gestion des Classes</h2>
+        <p>Organisation et administration des classes, niveaux et groupes d'étudiants.</p>
+        <div class="placeholder-features">
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Création et organisation des classes</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Affectation des étudiants</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Gestion des capacités</span>
+          </div>
+        </div>
+        <button class="btn-warning-enhanced" (click)="handleClassAction('create')">
+          <i class="bi bi-plus-circle"></i>
+          Ajouter une Classe
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'schedules' && !loading" class="placeholder-content animate-slide-up">
+      <div class="placeholder-card shadow-hover">
+        <div class="placeholder-icon">
+          <i class="bi bi-calendar3"></i>
+        </div>
+        <h2>Gestion des Emplois du Temps</h2>
+        <p>Planification et organisation des emplois du temps pour toutes les classes et enseignants.</p>
+        <div class="placeholder-features">
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Planification automatisée</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Gestion des conflits</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-check-circle"></i>
+            <span>Notifications et alertes</span>
+          </div>
+        </div>
+        <button class="btn-secondary-enhanced" (click)="handleScheduleAction('create')">
+          <i class="bi bi-plus-circle"></i>
+          Créer un Emploi du Temps
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
